@@ -32,7 +32,7 @@ def detect_labels(photo, url):
                             (left , top + height),
                             (left, top)
                 )
-                draw.line(points, fill='#00d400', width=2)
+                draw.line(points, fill='#00d400', width=4)
 
     imageName = time.asctime( time.localtime(time.time()) )
     buffer = BytesIO()
