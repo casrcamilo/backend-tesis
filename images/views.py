@@ -22,11 +22,11 @@ from rest_framework.settings import api_settings
 
 #from apps.users.permissions.auth import IsAdminOrOwner
 # models
-from images.models import Historico_Imagenes
+from images.models import Historico_Imagenes, Historic_Vehicles_detected
 #from apps.users.models import User_Course, User
 #from apps.dailyActivities.models import Daily_Activities
 #serializers
-from images.serializers import imagesSerializer
+from images.serializers import imagesSerializer, countVehiclesSerializer
 #from apps.users.serializers.appSerializers import dailyActivitiesSerializer
 
 class LargeResultsSetPagination(PageNumberPagination, BasePagination):
@@ -56,3 +56,11 @@ class Images(viewsets.GenericViewSet,
         serializer.is_valid()
         serializer.update(instance, serializer.data)
         return Response(serializer.data)  
+
+
+class CountVehicles(viewsets.GenericViewSet,
+                    mixins.CreateModelMixin):
+    permission_classes = (AllowAny,)
+    pagination_class = LargeResultsSetPagination
+    serializer_class = countVehiclesSerializer.CountVehiclesSerializer
+    queryset = Historic_Vehicles_detected.objects.all()

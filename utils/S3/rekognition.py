@@ -7,9 +7,10 @@ from django.conf import settings
 
 from PIL import Image, ImageDraw
 
+client=boto3.client('rekognition')
+bucket='tesis-files'
+
 def detect_labels(photo, url):
-    bucket='tesis-files'
-    client=boto3.client('rekognition')
 
     response = client.detect_labels(Image={'S3Object':{'Bucket':bucket,'Name':photo}})
     responseImg = requests.get(url)
@@ -47,3 +48,22 @@ def detect_labels(photo, url):
         ACL= 'public-read'
     )
     return str("https://%s.s3.amazonaws.com/%s.jpeg" % ('tesis-files', imageName)).replace(' ','+')
+
+def count_labels(device, image_name):
+    interest_labels = ['Car','Truck','Taxi','Bus']
+    vehicles = 0
+
+    response = client.detect_labels(Image={'S3Object':{'Bucket':bucket,'Name':device+'/'+image_name}})   
+    for label in response['Labels']:
+        if label['Name'] in interest_labels:
+            vehicles=vehicles+len(label['Instances'])
+
+    return(response, vehicles)
+
+
+
+
+#def detect_number_of_vehicles(photo, url):
+#    bucket='tesis-files'
+#    client=boto3.client('rekognition')  
+#    response = client.detect_labels(Image={'S3Object':{'Bucket':bucket,'Name':photo}})
