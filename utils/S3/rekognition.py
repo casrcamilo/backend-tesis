@@ -8,7 +8,8 @@ from django.conf import settings
 from PIL import Image, ImageDraw
 
 client=boto3.client('rekognition')
-bucket='tesis-files'
+bucket='tesis-images'
+interest_labels = ['Car','Truck','Taxi','Bus']
 
 def detect_labels(photo, url):
 
@@ -18,7 +19,7 @@ def detect_labels(photo, url):
     imgWidth,imgHeight  = im.size  
 
     for label in response['Labels']:
-        if (label['Name'] == 'Car' or label['Name'] == 'Motorcycle' or label['Name'] == 'Truck'  or label['Name'] == 'Bus'  or label['Name'] == 'Taxi' or label['Name'] == 'Boat'):
+        if (label['Name'] in interest_labels):
             for i in range(0, len(label['Instances'])):
                 draw = ImageDraw.Draw(im)
                 box=label['Instances'][i]['BoundingBox']
@@ -41,16 +42,15 @@ def detect_labels(photo, url):
     buffer.seek(0)
     s3 = boto3.client('s3')
     s3.put_object(
-        Bucket='tesis-files',
+        Bucket=bucket,
         Key=str('%s.jpeg' % imageName),
         Body=buffer,
         ContentType='image/jpeg',
         ACL= 'public-read'
     )
-    return str("https://%s.s3.amazonaws.com/%s.jpeg" % ('tesis-files', imageName)).replace(' ','+')
+    return str("https://%s.s3.amazonaws.com/%s.jpeg" % (bucket, imageName)).replace(' ','+')
 
 def count_labels(device, image_name):
-    interest_labels = ['Car','Truck','Taxi','Bus']
     vehicles = 0
 
     response = client.detect_labels(Image={'S3Object':{'Bucket':bucket,'Name':device+'/'+image_name}})   
